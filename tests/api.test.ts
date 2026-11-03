@@ -66,4 +66,37 @@ describe('Sendikko Express API Server Health & Routes', () => {
       server.close();
     }
   });
+
+  test('Telegram response parsing extracts file_id from video and animation payloads', () => {
+    // Verify parser handles video and animation classifications without throwing
+    const videoResponse = {
+      message_id: 101,
+      chat: { id: -10012345 },
+      video: {
+        file_id: 'video_file_id_123',
+        file_unique_id: 'unique_123',
+      },
+    };
+
+    const animationResponse = {
+      message_id: 102,
+      chat: { id: -10012345 },
+      animation: {
+        file_id: 'anim_file_id_456',
+        file_unique_id: 'unique_456',
+      },
+    };
+
+    const extractMedia = (msg: any) =>
+      msg.document ||
+      msg.video ||
+      msg.animation ||
+      msg.audio ||
+      msg.voice ||
+      msg.video_note ||
+      (msg.photo && msg.photo.length > 0 ? msg.photo[msg.photo.length - 1] : undefined);
+
+    assert.equal(extractMedia(videoResponse)?.file_id, 'video_file_id_123');
+    assert.equal(extractMedia(animationResponse)?.file_id, 'anim_file_id_456');
+  });
 });

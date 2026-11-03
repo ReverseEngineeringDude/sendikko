@@ -29,16 +29,24 @@ export interface TelegramApiResponse<T = any> {
   };
 }
 
+export interface TelegramMediaObject {
+  file_id: string;
+  file_unique_id: string;
+  file_name?: string;
+  mime_type?: string;
+  file_size?: number;
+}
+
 export interface TelegramMessage {
   message_id: number;
   chat: { id: number; title?: string };
-  document?: {
-    file_id: string;
-    file_unique_id: string;
-    file_name?: string;
-    mime_type?: string;
-    file_size?: number;
-  };
+  document?: TelegramMediaObject;
+  video?: TelegramMediaObject;
+  animation?: TelegramMediaObject;
+  audio?: TelegramMediaObject;
+  voice?: TelegramMediaObject;
+  video_note?: TelegramMediaObject;
+  photo?: Array<TelegramMediaObject & { width?: number; height?: number }>;
 }
 
 export interface TelegramFile {

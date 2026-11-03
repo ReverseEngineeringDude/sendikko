@@ -92,9 +92,10 @@ export class TelegramService {
         const form = new FormData();
         form.append('chat_id', this.channelId);
         form.append('caption', caption || `📁 Sendikko: ${filename}`);
+        form.append('disable_content_type_detection', 'true');
         form.append('document', chunkBuffer, {
           filename,
-          contentType: contentType || 'application/octet-stream',
+          contentType: 'application/octet-stream',
         });
 
         const response = await this.client.post<TelegramApiResponse<TelegramMessage>>(
@@ -107,18 +108,35 @@ export class TelegramService {
           }
         );
 
-        if (!response.data.ok || !response.data.result || !response.data.result.document) {
+        if (!response.data.ok || !response.data.result) {
           throw new Error(
             response.data.description || 'Failed to upload document to Telegram'
           );
         }
 
         const msg = response.data.result;
+        // In Telegram Bot API, video/animation/audio files sent via sendDocument
+        // may be classified as video, animation, audio, or document by Telegram.
+        const media =
+          msg.document ||
+          msg.video ||
+          msg.animation ||
+          msg.audio ||
+          msg.voice ||
+          msg.video_note ||
+          (msg.photo && msg.photo.length > 0 ? msg.photo[msg.photo.length - 1] : undefined);
+
+        if (!media || !media.file_id) {
+          logger.error({ msg, fileId, chunkIdx }, 'Telegram did not return any media file_id');
+          throw new Error('Failed to upload chunk to Telegram: no media file_id returned');
+        }
+
         return {
           messageId: msg.message_id,
-          fileId: msg.document!.file_id,
+          fileId: media.file_id,
         };
       } catch (err: any) {
+        const isAxios = axios.isAxiosError(err);
         const status = err.response?.status;
         const retryAfter = err.response?.data?.parameters?.retry_after;
 
@@ -131,8 +149,9 @@ export class TelegramService {
           continue;
         }
 
+        // Only retry if it was an actual Axios network failure or 5xx server error from Telegram
         const isNetworkOr5xx =
-          !status || (status >= 500 && status < 600) || err.code === 'ECONNABORTED';
+          isAxios && (!status || (status >= 500 && status < 600) || err.code === 'ECONNABORTED');
 
         if (isNetworkOr5xx && attempt < maxRetries) {
           const backoff = Math.pow(2, attempt) * 1000;

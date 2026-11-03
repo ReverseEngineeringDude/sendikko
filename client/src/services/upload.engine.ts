@@ -177,10 +177,10 @@ export class UploadEngine {
 
     while (attempt < maxRetries) {
       attempt++;
+      let attemptLoaded = 0;
       try {
         const idempotencyKey = `${uploadId}-${chunkIdx}-${sha256Hex.substring(0, 16)}`;
 
-        let previousLoaded = 0;
         await ApiService.uploadChunk(
           uploadId,
           chunkIdx,
@@ -192,16 +192,21 @@ export class UploadEngine {
             'X-Chunk-Size': chunkBuffer.byteLength.toString(),
           },
           (progressEvent) => {
-            const delta = (progressEvent.loaded || 0) - previousLoaded;
+            const loaded = progressEvent.loaded || 0;
+            const delta = loaded - attemptLoaded;
             if (delta > 0) {
               this.uploadedBytes += delta;
-              previousLoaded = progressEvent.loaded || 0;
+              attemptLoaded = loaded;
             }
           }
         );
 
         return; // Success!
       } catch (err: any) {
+        // Rollback any bytes added by this failed attempt
+        if (attemptLoaded > 0) {
+          this.uploadedBytes = Math.max(0, this.uploadedBytes - attemptLoaded);
+        }
         const status = err.response?.status;
         const retryAfter = err.response?.data?.parameters?.retry_after;
 

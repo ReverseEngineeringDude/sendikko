@@ -283,25 +283,31 @@ router.put(
       const encryptedTgFileId = CryptoService.encryptAtRest(tgResult.fileId);
 
       // Save chunk in database and update session
-      await prisma.$transaction([
-        prisma.chunk.create({
-          data: {
-            fileId: session.fileId,
-            idx: chunkIdx,
-            tgMessageId: BigInt(tgResult.messageId),
-            tgFileIdEnc: encryptedTgFileId,
-            size: req.file.buffer.length,
-            sha256: computedSha256,
-            iv: clientIv,
-          },
-        }),
-        prisma.uploadSession.update({
-          where: { id: session.id },
-          data: {
-            lastChunk: Math.max(session.lastChunk, chunkIdx),
-          },
-        }),
-      ]);
+      try {
+        await prisma.$transaction([
+          prisma.chunk.create({
+            data: {
+              fileId: session.fileId,
+              idx: chunkIdx,
+              tgMessageId: BigInt(tgResult.messageId),
+              tgFileIdEnc: encryptedTgFileId,
+              size: req.file.buffer.length,
+              sha256: computedSha256,
+              iv: clientIv,
+            },
+          }),
+          prisma.uploadSession.update({
+            where: { id: session.id },
+            data: {
+              lastChunk: Math.max(session.lastChunk, chunkIdx),
+            },
+          }),
+        ]);
+      } catch (dbErr: any) {
+        // Clean up orphaned message in Telegram to prevent duplicates if DB fails
+        await telegramService.deleteChunkMessage(tgResult.messageId).catch(() => {});
+        throw dbErr;
+      }
 
       res.json({
         idx: chunkIdx,
