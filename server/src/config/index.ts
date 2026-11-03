@@ -3,11 +3,31 @@ import { z } from 'zod';
 
 dotenv.config();
 
-// Ensure DIRECT_URL uses the IPv4-compatible pooler host if db.* is provided
-if (process.env.DIRECT_URL && process.env.DIRECT_URL.includes('db.cioeerrhpqiqmsbouufp.supabase.co')) {
-  process.env.DIRECT_URL = process.env.DIRECT_URL
-    .replace('db.cioeerrhpqiqmsbouufp.supabase.co:5432', 'aws-1-eu-central-1.pooler.supabase.com:5432')
-    .replace('postgres:', 'postgres.cioeerrhpqiqmsbouufp:');
+function cleanDatabaseUrl(url?: string): string | undefined {
+  if (!url) return url;
+  let res = url.trim();
+  // 1. Replace unroutable IPv6 direct domain with IPv4 pooler
+  if (res.includes('db.cioeerrhpqiqmsbouufp.supabase.co')) {
+    res = res
+      .replace('db.cioeerrhpqiqmsbouufp.supabase.co:5432', 'aws-1-eu-central-1.pooler.supabase.com:6543')
+      .replace('postgres:', 'postgres.cioeerrhpqiqmsbouufp:');
+  }
+  // 2. Fix unencoded '@' in password '@Red_is_god_03'
+  if (res.includes(':@Red_is_god_03@')) {
+    res = res.replace(':@Red_is_god_03@', ':%40Red_is_god_03@');
+  }
+  // 3. Ensure pgbouncer=true if connecting to port 6543
+  if (res.includes(':6543') && !res.includes('pgbouncer=true')) {
+    res += res.includes('?') ? '&pgbouncer=true' : '?pgbouncer=true';
+  }
+  return res;
+}
+
+if (process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = cleanDatabaseUrl(process.env.DATABASE_URL);
+}
+if (process.env.DIRECT_URL) {
+  process.env.DIRECT_URL = cleanDatabaseUrl(process.env.DIRECT_URL);
 }
 
 const configSchema = z.object({

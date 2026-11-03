@@ -12,6 +12,7 @@ import { fileRoutes } from './routes/file.routes.js';
 import { userRoutes } from './routes/user.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { telegramService } from './services/telegram.service.js';
+import { prisma } from './utils/prisma.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,11 +113,22 @@ export const createApp = () => {
 
   // Health Check Endpoint
   app.get('/health', async (_req, res) => {
+    let dbStatus = 'ok';
+    let dbError = undefined;
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (err: any) {
+      dbStatus = 'error';
+      dbError = err.message;
+    }
+
     const tgHealth = await telegramService.testConnection();
+
     res.json({
-      status: 'ok',
+      status: dbStatus === 'ok' ? 'ok' : 'degraded',
       service: 'Sendikko API',
       timestamp: new Date().toISOString(),
+      database: { status: dbStatus, error: dbError },
       telegram: tgHealth,
     });
   });
