@@ -1,0 +1,139 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  firebaseUid String   @unique @map("firebase_uid")
+  email       String
+  name        String
+  avatarUrl   String?  @map("avatar_url")
+  quotaBytes  BigInt   @default(10737418240) @map("quota_bytes") // 10GB default
+  role        String   @default("user")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  files       File[]
+
+  @@map("users")
+}
+
+model File {
+  id            String         @id @default(uuid())
+  ownerId       String         @map("owner_id")
+  code          String         @unique
+  nameEnc       String         @map("name_enc")
+  mimeEnc       String         @default("application/octet-stream") @map("mime_enc")
+  size          BigInt
+  chunkCount    Int            @map("chunk_count")
+  chunkSize     Int            @default(19922944) @map("chunk_size")
+  pwVerifier    String?        @map("pw_verifier")
+  pwSalt        String?        @map("pw_salt")
+  kdfParams     String?        @map("kdf_params") // JSON string of algorithm params
+  expiresAt     DateTime?      @map("expires_at")
+  maxDownloads  Int?           @map("max_downloads")
+  downloadCount Int            @default(0) @map("download_count")
+  status        String         @default("uploading") // uploading, active, expired, disabled, trashed
+  createdAt     DateTime       @default(now()) @map("created_at")
+  deletedAt     DateTime?      @map("deleted_at")
+
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  chunks        Chunk[]
+  uploadSessions UploadSession[]
+  downloadLogs  DownloadLog[]
+  uploadLogs    UploadLog[]
+  reports       Report[]
+
+  @@index([code])
+  @@index([ownerId, status])
+  @@index([expiresAt])
+  @@map("files")
+}
+
+model Chunk {
+  fileId        String   @map("file_id")
+  idx           Int
+  tgMessageId   BigInt   @map("tg_message_id")
+  tgFileIdEnc   String   @map("tg_file_id_enc")
+  size          Int
+  sha256        String
+  iv            String
+
+  file          File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@id([fileId, idx])
+  @@index([fileId])
+  @@map("chunks")
+}
+
+model UploadSession {
+  id         String   @id @default(uuid())
+  fileId     String   @map("file_id")
+  state      String   @default("in_progress") // in_progress, completed, aborted
+  lastChunk  Int      @default(-1) @map("last_chunk")
+  expiresAt  DateTime @map("expires_at")
+
+  file       File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@map("upload_sessions")
+}
+
+model DownloadLog {
+  id        String   @id @default(uuid())
+  fileId    String   @map("file_id")
+  at        DateTime @default(now())
+  ipHash    String   @map("ip_hash")
+  uaHash    String   @map("ua_hash")
+
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@map("download_logs")
+}
+
+model Report {
+  id        String   @id @default(uuid())
+  fileId    String   @map("file_id")
+  reason    String
+  createdAt DateTime @default(now()) @map("created_at")
+  status    String   @default("pending") // pending, resolved, dismissed
+
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@map("reports")
+}
+
+model UploadLog {
+  id        String   @id @default(uuid())
+  fileId    String   @map("file_id")
+  ip        String
+  city      String?
+  region    String?
+  country   String?
+  loc       String?
+  org       String?
+  device    String?
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@map("upload_logs")
+}
+
+model TelegramCleanupQueue {
+  id          String   @id @default(uuid())
+  tgMessageId BigInt   @map("tg_message_id")
+  retryCount  Int      @default(0) @map("retry_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("telegram_cleanup_queue")
+}

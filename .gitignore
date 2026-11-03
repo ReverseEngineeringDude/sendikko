@@ -1,0 +1,86 @@
+# ==========================================
+# Dependencies
+# ==========================================
+node_modules/
+*/node_modules/
+.pnp
+.pnp.js
+
+# ==========================================
+# Production & Build Artifacts
+# ==========================================
+dist/
+*/dist/
+build/
+*/build/
+out/
+.output/
+*.tsbuildinfo
+
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env.*
+*.env
+.env.example
+*.env.example
+client/.env*
+server/.env*
+
+# Service account & private keys
+*service-account*.json
+*firebase-adminsdk*.json
+*.pem
+*.key
+*.cert
+
+# ==========================================
+# Logs & Process
+# ==========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================================
+# Firebase CLI Cache & Emulators
+# ==========================================
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# ==========================================
+# Local Cache & Temp Files
+# ==========================================
+.cache/
+tmp/
+temp/
+sendikko_mock_chunks/
+*mock_chunks*
+
+# ==========================================
+# Testing & Coverage
+# ==========================================
+coverage/
+.nyc_output/
+
+# ==========================================
+# Operating System & IDE
+# ==========================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo

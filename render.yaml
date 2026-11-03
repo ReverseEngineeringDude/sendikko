@@ -1,0 +1,39 @@
+services:
+  # Sendikko Full-Stack Web Service (Serves both Express API and Vite React Frontend)
+  - type: web
+    name: sendikko
+    env: node
+    plan: free
+    region: frankfurt # Same region as Supabase eu-central-1 pooler for lowest latency
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false # Set in Render Dashboard
+      - key: DIRECT_URL
+        sync: false # Set in Render Dashboard
+      - key: CLIENT_URL
+        value: https://sendikko.onrender.com # Change to your custom domain or Render URL
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: CHUNK_ENC_KEY
+        generateValue: true
+      - key: IP_SALT
+        generateValue: true
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false # Set in Render Dashboard
+      - key: TELEGRAM_CHANNEL_ID
+        sync: false # Set in Render Dashboard
+      - key: FIREBASE_PROJECT_ID
+        value: sendikko-8b6e6
+      - key: CHUNK_SIZE_MB
+        value: 19
