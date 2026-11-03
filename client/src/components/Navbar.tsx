@@ -27,7 +27,9 @@ export const Navbar = () => {
       await signInWithFirebase();
     } catch (err: any) {
       if (err.code !== 'auth/popup-closed-by-user') {
-        alert('Sign-in failed: ' + (err.message || err));
+        const errorMsg =
+          err.response?.data?.error?.message || err.message || String(err);
+        alert('Sign-in failed: ' + errorMsg);
       }
     } finally {
       setSigningIn(false);

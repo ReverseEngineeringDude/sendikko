@@ -6,6 +6,7 @@ import { validate } from '../middleware/validate.js';
 import { authLimiter } from '../middleware/rateLimiter.js';
 import { requireAuth } from '../middleware/auth.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
@@ -19,9 +20,21 @@ const tokenAuthSchema = z.object({
  * Common handler for Firebase Auth token exchange
  */
 const handleTokenExchange = async (idToken: string, res: any, next: any) => {
+  let firebaseUser;
   try {
-    const firebaseUser = await AuthService.verifyFirebaseIdToken(idToken);
+    firebaseUser = await AuthService.verifyFirebaseIdToken(idToken);
+  } catch (authErr: any) {
+    logger.error({ err: authErr.message }, 'Firebase token verification failed');
+    res.status(401).json({
+      error: {
+        code: 'FIREBASE_AUTH_FAILED',
+        message: authErr.message || 'Firebase authentication failed',
+      },
+    });
+    return;
+  }
 
+  try {
     // Upsert user in Supabase / PostgreSQL database
     const user = await prisma.user.upsert({
       where: { firebaseUid: firebaseUser.uid },
@@ -58,11 +71,13 @@ const handleTokenExchange = async (idToken: string, res: any, next: any) => {
       },
       accessToken,
     });
-  } catch (err: any) {
-    next({
-      statusCode: 401,
-      code: 'FIREBASE_AUTH_FAILED',
-      message: err.message || 'Firebase authentication failed',
+  } catch (dbErr: any) {
+    logger.error({ err: dbErr.message }, 'Failed to upsert user in database');
+    res.status(500).json({
+      error: {
+        code: 'DATABASE_ERROR',
+        message: dbErr.message || 'Database error during authentication',
+      },
     });
   }
 };
