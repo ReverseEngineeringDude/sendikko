@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "sendikko",
     "public": "client/dist",
     "ignore": [
       "firebase.json",

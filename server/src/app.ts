@@ -65,6 +65,8 @@ export const createApp = () => {
           config.CLIENT_URL,
           'http://localhost:5173',
           'http://127.0.0.1:5173',
+          'https://sendikko.web.app',
+          'https://sendikko.firebaseapp.com',
           'https://sendikko-8b6e6.web.app',
           'https://sendikko-8b6e6.firebaseapp.com',
         ];
