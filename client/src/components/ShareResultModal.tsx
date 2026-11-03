@@ -13,8 +13,15 @@ export const ShareResultModal = () => {
 
   if (!completedFile) return null;
 
-  const shareUrl = completedFile.shareUrl || `${window.location.origin}/d/${completedFile.code}`;
   const code = completedFile.code || '';
+  
+  // Always derive shareUrl dynamically from current browser origin to prevent stale/hardcoded domains
+  let shareUrl = `${window.location.origin}/d/${code}`;
+  if (completedFile.keyHex) {
+    shareUrl = `${shareUrl}#k=${completedFile.keyHex}`;
+  } else if (completedFile.shareUrl && completedFile.shareUrl.includes('#k=')) {
+    shareUrl = `${shareUrl}#k=${completedFile.shareUrl.split('#k=')[1]}`;
+  }
 
   const handleCopyLink = async () => {
     try {

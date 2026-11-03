@@ -132,10 +132,11 @@ export class UploadEngine {
 
       // Finalize upload
       const completeRes = await ApiService.completeUpload(uploadId);
-      const finalShareUrl = completeRes.data.shareUrl;
+      const fileCode = completeRes.data.code || code;
+      const finalShareUrl = `${window.location.origin}/d/${fileCode}`;
 
       this.callbacks.onSuccess({
-        code: completeRes.data.code || code,
+        code: fileCode,
         shareUrl: finalShareUrl,
       });
     } catch (err: any) {

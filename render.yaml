@@ -18,7 +18,7 @@ services:
       - key: DIRECT_URL
         sync: false # Set in Render Dashboard
       - key: CLIENT_URL
-        value: https://sendikko.onrender.com # Change to your custom domain or Render URL
+        value: https://sendikko.web.app # Firebase Hosting frontend domain
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET

@@ -33,7 +33,7 @@ if (process.env.DIRECT_URL) {
 const configSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(4000),
-  CLIENT_URL: z.string().default('http://localhost:5173'),
+  CLIENT_URL: z.string().default('https://sendikko.web.app'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   DIRECT_URL: z.string().optional(),
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
@@ -58,7 +58,7 @@ const parseConfig = () => {
       return {
         NODE_ENV: 'test',
         PORT: 4000,
-        CLIENT_URL: 'http://localhost:5173',
+        CLIENT_URL: 'https://sendikko.web.app',
         DATABASE_URL: process.env.DATABASE_URL || 'postgresql://sendikko:sendikko@localhost:5432/sendikko?schema=public',
         DIRECT_URL: undefined,
         JWT_ACCESS_SECRET: '0123456789abcdef0123456789abcdef0123456789abcdef',
