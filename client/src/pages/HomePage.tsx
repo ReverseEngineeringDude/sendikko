@@ -15,6 +15,8 @@ import {
   Flame,
   CheckCircle2,
   HelpCircle,
+  Infinity as InfinityIcon,
+  FileCheck,
 } from 'lucide-react';
 
 export const HomePage = () => {
@@ -41,15 +43,15 @@ export const HomePage = () => {
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-100 leading-[1.15]">
-          Share files privately.{' '}
+          Free, Unlimited,{' '}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-            No limits, zero logs.
+            Private &amp; Secure File Sharing.
           </span>
         </h1>
 
         <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Files are split into 19 MB chunks, encrypted client-side with AES-256-GCM in Web Workers,
-          and stored safely in a private cloud vault. Receivers need no account.
+          Send large files with client-side zero-knowledge AES-256-GCM encryption.
+          No file size limits, fast parallel streaming, and receivers need no account.
         </p>
 
         {/* Enter Code Box */}
@@ -76,6 +78,60 @@ export const HomePage = () => {
       {/* Upload Dropzone Section */}
       <section className="w-full">
         <Dropzone />
+      </section>
+
+      {/* 4 Pillars of Sendikko: Free, Unlimited, Private, Secure */}
+      <section className="w-full space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-100">
+            Why Choose Sendikko for File Sharing?
+          </h2>
+          <p className="text-sm text-slate-400 max-w-xl mx-auto">
+            Engineered from the ground up for maximum privacy, blistering speed, and effortless delivery.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-indigo-500/30 transition-colors space-y-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+              <Zap className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">100% Free Sharing</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              No hidden paywalls, subscriptions, or credit card requirements. Share files with anyone completely free.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-indigo-500/30 transition-colors space-y-2.5">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+              <InfinityIcon className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Unlimited Transfers</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Send large videos, raw photos, and bulk archives. Parallel 19 MB chunking streams files without interruptions.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-indigo-500/30 transition-colors space-y-2.5">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+              <EyeOff className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Zero-Knowledge Privacy</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Decryption keys stay in URL fragments (#k=...) and are never sent to the server. No tracking or snooping.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-indigo-500/30 transition-colors space-y-2.5">
+            <div className="w-9 h-9 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400">
+              <Lock className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Cryptographic Security</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Military-grade AES-256-GCM cipher with PBKDF2/Argon2 password protection and self-destructing links.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* 3-Step "How It Works" */}
@@ -175,10 +231,27 @@ export const HomePage = () => {
         <h2 className="text-2xl font-bold text-slate-100 text-center">Frequently Asked Questions</h2>
         <div className="space-y-4">
           <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800">
-            <h4 className="text-sm font-semibold text-slate-200">How do receivers download files?</h4>
+            <h4 className="text-sm font-semibold text-slate-200">Is Sendikko really free with unlimited file sharing?</h4>
             <p className="text-xs text-slate-400 mt-1">
-              They open the link (e.g. <code className="text-indigo-300">/d/7K9N3W2X</code>) or enter the 8-character code
-              directly on this homepage. No account or Google sign-in is ever needed to download.
+              Yes, 100%. Sendikko lets you upload and share large files completely free without subscriptions or speed throttling. Files are divided into efficient 19 MB chunks so you can transfer multi-gigabyte videos, images, and archives seamlessly.
+            </p>
+          </div>
+          <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <h4 className="text-sm font-semibold text-slate-200">How is Sendikko more private and secure than other file transfers?</h4>
+            <p className="text-xs text-slate-400 mt-1">
+              Traditional cloud providers hold the keys and can scan, index, or analyze your files. Sendikko encrypts all files client-side using Web Workers with AES-256-GCM. The decryption keys exist only on your device and in the link fragment (<code className="text-indigo-300">#k=...</code>), which is never transmitted over HTTP headers or stored on our servers.
+            </p>
+          </div>
+          <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <h4 className="text-sm font-semibold text-slate-200">Do receivers need an account or app to download?</h4>
+            <p className="text-xs text-slate-400 mt-1">
+              No account, sign-in, or special app is ever required for receivers. They simply open your share link (e.g. <code className="text-indigo-300">/d/7K9N3W2X</code>) or enter the 8-character code on the homepage, and the file streams and decrypts directly in their browser.
+            </p>
+          </div>
+          <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <h4 className="text-sm font-semibold text-slate-200">Can I password-protect or set expiration limits on my files?</h4>
+            <p className="text-xs text-slate-400 mt-1">
+              Yes! You can add custom password protection with PBKDF2 key derivation, set self-destruct timers (e.g. 1 hour, 1 day, 7 days), or set maximum download limits (e.g. burn after 1 download).
             </p>
           </div>
           <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800">
@@ -188,9 +261,9 @@ export const HomePage = () => {
             </p>
           </div>
           <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800">
-            <h4 className="text-sm font-semibold text-slate-200">What happens when a file is deleted?</h4>
+            <h4 className="text-sm font-semibold text-slate-200">What happens when a file expires or is deleted?</h4>
             <p className="text-xs text-slate-400 mt-1">
-              Deleted files enter a 7-day trash. When permanently deleted (or expired), Sendikko permanently purges and erases all chunk blobs from the vault.
+              When a file expires or is deleted, Sendikko automatically and permanently purges all encrypted chunk blobs from storage, guaranteeing no trace remains.
             </p>
           </div>
         </div>

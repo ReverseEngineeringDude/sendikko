@@ -1,15 +1,28 @@
 {
   "short_name": "Sendikko",
-  "name": "Sendikko Private File Sharing",
+  "name": "Sendikko — Free, Unlimited, Private & Secure File Sharing",
+  "description": "Free, unlimited, private and secure file sharing with client-side zero-knowledge AES-256-GCM encryption. Fast downloads and no account required.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090d16",
+  "theme_color": "#0f172a",
+  "categories": [
+    "utilities",
+    "productivity",
+    "business"
+  ],
   "icons": [
     {
       "src": "/logo.svg",
       "type": "image/svg+xml",
       "sizes": "192x192 512x512"
+    },
+    {
+      "src": "/og-image.png",
+      "type": "image/png",
+      "sizes": "1200x630"
     }
-  ],
-  "start_url": "/",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "display": "standalone"
+  ]
 }

@@ -1,0 +1,20 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /d/
+Allow: /sitemap.xml
+Allow: /robots.txt
+Allow: /logo.svg
+Allow: /og-image.png
+Allow: /manifest.json
+
+# Private or authenticated user dashboards
+Disallow: /api/
+Disallow: /dashboard
+
+# Crawl Delay
+Crawl-delay: 1
+
+# Host & Sitemap Directives
+Host: https://sendikko.web.app
+Sitemap: https://sendikko.web.app/sitemap.xml

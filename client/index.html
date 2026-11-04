@@ -1,20 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Sendikko - Zero Knowledge Private File Sharing" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Sendikko — Free, Unlimited, Private &amp; Secure File Sharing</title>
+    <meta name="title" content="Sendikko — Free, Unlimited, Private &amp; Secure File Sharing" />
+    <meta
+      name="description"
+      content="Sendikko is a free, unlimited, private and secure file sharing platform. Send large files anonymously with client-side zero-knowledge AES-256-GCM encryption. Fast downloads, custom password protection, and zero logs."
+    />
+    <meta
+      name="keywords"
+      content="free file sharing, unlimited file sharing, private file sharing, secure file transfer, send large files free, encrypted file sharing, zero knowledge, anonymous file share, private cloud vault, share files online, p2p file transfer, fast upload, password protected files, self destructing files, sendikko"
+    />
+    <meta name="author" content="Sendikko" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://sendikko.web.app/" />
+
+    <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sendikko.web.app/" />
+    <meta property="og:site_name" content="Sendikko" />
+    <meta property="og:title" content="Sendikko — Free, Unlimited, Private &amp; Secure File Sharing" />
+    <meta
+      property="og:description"
+      content="Free, unlimited, private &amp; secure file sharing with client-side zero-knowledge AES-256-GCM encryption. Fast downloads, zero logs, and no registration required."
+    />
+    <meta property="og:image" content="https://sendikko.web.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://sendikko.web.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Sendikko - Free, Unlimited, Private &amp; Secure File Sharing" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://sendikko.web.app/" />
+    <meta name="twitter:title" content="Sendikko — Free, Unlimited, Private &amp; Secure File Sharing" />
+    <meta
+      name="twitter:description"
+      content="Free, unlimited, private &amp; secure file sharing. Zero-knowledge client-side encryption. No logs, fast downloads, no registration required."
+    />
+    <meta name="twitter:image" content="https://sendikko.web.app/og-image.png" />
+    <meta name="twitter:image:alt" content="Sendikko - Free, Unlimited, Private &amp; Secure File Sharing" />
+
+    <!-- Favicon & Mobile Icons -->
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="apple-touch-icon" href="/logo.svg" />
     <meta name="theme-color" content="#0f172a" />
+    <meta name="application-name" content="Sendikko" />
+    <meta name="apple-mobile-web-app-title" content="Sendikko" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Fonts & Identity -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <title>Sendikko — Private Zero-Knowledge File Sharing</title>
+
+    <!-- Structured Data (JSON-LD) for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://sendikko.web.app/#webapp",
+          "name": "Sendikko",
+          "alternateName": ["Sendikko File Sharing", "Sendikko Vault"],
+          "url": "https://sendikko.web.app/",
+          "applicationCategory": "UtilitiesApplication, FileSharingApplication",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires JavaScript and WebCrypto API",
+          "description": "Free, unlimited, private and secure file sharing with client-side zero-knowledge AES-256-GCM encryption. Fast downloads, password protection, and zero logs.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+          },
+          "featureList": [
+            "100% Free & Unlimited file sharing",
+            "Client-side AES-256-GCM zero-knowledge encryption",
+            "Private cloud vault with zero server knowledge",
+            "No account needed for receivers",
+            "Custom password protection with PBKDF2/Argon2",
+            "Self-destructing links and burn-after-download limits",
+            "19 MB chunk parallel streaming engine",
+            "Instant QR code sharing and 8-character codes"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://sendikko.web.app/#website",
+          "url": "https://sendikko.web.app/",
+          "name": "Sendikko",
+          "description": "Free, Unlimited, Private & Secure File Sharing",
+          "inLanguage": "en-US",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://sendikko.web.app/d/{search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white">
     <div id="root"></div>

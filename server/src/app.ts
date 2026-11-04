@@ -133,6 +133,19 @@ export const createApp = () => {
     });
   });
 
+  // SEO Endpoints (Robots & Sitemap fallback)
+  app.get('/robots.txt', (_req, res) => {
+    res.type('text/plain').send(
+      `User-agent: *\nAllow: /\nAllow: /d/\nDisallow: /api/\nDisallow: /dashboard\nSitemap: ${config.CLIENT_URL}/sitemap.xml\n`
+    );
+  });
+
+  app.get('/sitemap.xml', (_req, res) => {
+    res.type('application/xml').send(
+      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>${config.CLIENT_URL}/</loc>\n    <lastmod>2026-11-04</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n</urlset>`
+    );
+  });
+
   // REST API Routes under /api/v1
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/uploads', uploadRoutes);

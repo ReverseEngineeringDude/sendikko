@@ -7,11 +7,22 @@ export const Footer = () => {
         <div className="flex flex-col items-center md:items-start gap-2">
           <div className="flex items-center gap-2">
             <span className="text-base font-bold text-slate-200">Sendikko</span>
-            <span className="text-xs text-slate-500">— End-to-End Encrypted File Relay</span>
+            <span className="text-xs text-slate-500">— Free, Unlimited, Private &amp; Secure File Sharing</span>
           </div>
-          <p className="text-xs text-slate-500 max-w-sm text-center md:text-left">
-            Client-side AES-256-GCM chunk encryption. High-durability private object store. Zero server knowledge.
+          <p className="text-xs text-slate-500 max-w-md text-center md:text-left">
+            Client-side AES-256-GCM chunk encryption. High-durability private cloud vault. Zero server knowledge, no logs, and no registration required.
           </p>
+          <div className="flex items-center gap-4 text-[11px] text-slate-600 pt-1">
+            <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">
+              Sitemap
+            </a>
+            <span>•</span>
+            <a href="/robots.txt" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">
+              Robots.txt
+            </a>
+            <span>•</span>
+            <span>Zero-Knowledge Architecture</span>
+          </div>
         </div>
 
         {/* Security badges */}
