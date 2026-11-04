@@ -3,17 +3,22 @@ import { useUploadStore } from '../stores/upload.store.ts';
 import { Dialog } from './ui/Dialog.tsx';
 import { Button } from './ui/Button.tsx';
 import { QRCodeModal } from './QRCodeModal.tsx';
-import { Copy, Check, QrCode, Share2, Shield, Lock } from 'lucide-react';
+import { Copy, Check, QrCode, Share2, Shield, Lock, Film, ExternalLink } from 'lucide-react';
 
 export const ShareResultModal = () => {
   const { completedFile, isResultModalOpen, closeResultModal } = useUploadStore();
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedStreamLink, setCopiedStreamLink] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
 
   if (!completedFile) return null;
 
   const code = completedFile.code || '';
+  const isVideo =
+    completedFile.file?.type?.startsWith('video/') ||
+    /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(completedFile.name);
+  const streamWatchUrl = `${window.location.origin}/v/${code}`;
   
   // Always derive shareUrl dynamically from current browser origin to prevent stale/hardcoded domains
   let shareUrl = `${window.location.origin}/d/${code}`;
@@ -106,6 +111,56 @@ export const ShareResultModal = () => {
               </Button>
             </div>
           </div>
+
+          {/* Video Stream & Reddit Showcase (If Video) */}
+          {isVideo && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-950/30 via-slate-900 to-amber-950/20 border border-orange-500/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Film className="w-4 h-4 text-orange-400" />
+                  <span className="text-xs font-bold text-orange-200 uppercase tracking-wider">
+                    Reddit Video Stream Ready
+                  </span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">
+                  RedGIFs Alternative
+                </span>
+              </div>
+              <p className="text-xs text-slate-300">
+                Stream this video directly in Reddit posts, Discord, or iframes with auto-looping and sound toggle.
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value={streamWatchUrl}
+                  className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs text-slate-300 font-mono truncate focus:outline-none"
+                />
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(streamWatchUrl);
+                    setCopiedStreamLink(true);
+                    setTimeout(() => setCopiedStreamLink(false), 2000);
+                  }}
+                  className="flex-shrink-0"
+                >
+                  {copiedStreamLink ? <Check className="w-4 h-4 mr-1 text-emerald-400" /> : <Copy className="w-4 h-4 mr-1" />}
+                  {copiedStreamLink ? 'Copied' : 'Copy'}
+                </Button>
+                <a
+                  href={streamWatchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0"
+                >
+                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </a>
+              </div>
+            </div>
+          )}
 
           {/* Action Row */}
           <div className="grid grid-cols-2 gap-3">

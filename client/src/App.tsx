@@ -10,15 +10,28 @@ import { HomePage } from './pages/HomePage.tsx';
 import { DownloadPage } from './pages/DownloadPage.tsx';
 import { DashboardPage } from './pages/DashboardPage.tsx';
 import { RequestFilesPage } from './pages/RequestFilesPage.tsx';
+import { VideoWatchPage } from './pages/VideoWatchPage.tsx';
 
 export function App() {
   const { checkSession, isAuthenticated, isLoading } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
+  const isEmbed = typeof window !== 'undefined' && window.location.pathname.includes('/embed');
 
   useEffect(() => {
     setTheme(theme);
     checkSession();
   }, [checkSession, setTheme, theme]);
+
+  if (isEmbed) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/v/:code/embed" element={<VideoWatchPage isEmbed />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
 
   return (
     <BrowserRouter>
@@ -29,6 +42,8 @@ export function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/d/:code" element={<DownloadPage />} />
+            <Route path="/v/:code" element={<VideoWatchPage />} />
+            <Route path="/v/:code/embed" element={<VideoWatchPage isEmbed />} />
             <Route
               path="/dashboard"
               element={

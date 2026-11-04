@@ -99,4 +99,34 @@ describe('Sendikko Express API Server Health & Routes', () => {
     assert.equal(extractMedia(videoResponse)?.file_id, 'video_file_id_123');
     assert.equal(extractMedia(animationResponse)?.file_id, 'anim_file_id_456');
   });
+
+  test('GET /api/v1/files/INVALID_CODE/stream returns 404', async () => {
+    const server = app.listen(0);
+    const address = server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/api/v1/files/INVALID_CODE/stream`);
+      assert.equal(res.status, 404);
+      const data = await res.json();
+      assert.equal(data.error.code, 'FILE_NOT_FOUND');
+    } finally {
+      server.close();
+    }
+  });
+
+  test('HEAD /api/v1/files/INVALID_CODE/stream returns 404', async () => {
+    const server = app.listen(0);
+    const address = server.address();
+    const port = typeof address === 'object' && address ? address.port : 0;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/api/v1/files/INVALID_CODE/stream`, {
+        method: 'HEAD',
+      });
+      assert.equal(res.status, 404);
+    } finally {
+      server.close();
+    }
+  });
 });

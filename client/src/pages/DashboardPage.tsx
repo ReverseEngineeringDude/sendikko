@@ -526,6 +526,17 @@ export const DashboardPage = () => {
                       >
                         <ExternalLink className="w-4 h-4" />
                       </a>
+                      {(file.mimeEnc?.startsWith('video') || /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(file.nameEnc)) && (
+                        <a
+                          href={`/v/${file.code}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded-lg hover:bg-slate-800 text-orange-400 transition-colors"
+                          title="Stream Video / Reddit Player"
+                        >
+                          <Film className="w-4 h-4" />
+                        </a>
+                      )}
                       <button
                         onClick={() => handleRename(file)}
                         className="p-1.5 rounded-lg hover:bg-slate-800 hover:text-slate-100 transition-colors"
@@ -646,6 +657,17 @@ export const DashboardPage = () => {
                     >
                       <ExternalLink className="w-4 h-4" />
                     </a>
+                    {(file.mimeEnc?.startsWith('video') || /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(file.nameEnc)) && (
+                      <a
+                        href={`/v/${file.code}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 rounded-lg text-orange-400 hover:bg-slate-800 transition-colors"
+                        title="Stream Video / Reddit Player"
+                      >
+                        <Film className="w-4 h-4" />
+                      </a>
+                    )}
                     <button
                       onClick={() => handleRename(file)}
                       className="p-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"

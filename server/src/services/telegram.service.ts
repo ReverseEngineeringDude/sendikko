@@ -19,6 +19,7 @@ export class TelegramService {
   private botToken: string;
   private channelId: string;
   private mockDir: string;
+  private downloadUrlCache = new Map<string, { url: string; expiresAt: number }>();
 
   constructor() {
     this.botToken = config.TELEGRAM_BOT_TOKEN;
@@ -180,8 +181,14 @@ export class TelegramService {
 
   /**
    * Resolves the Telegram download file URL for a given file_id.
+   * Caches URLs for 45 minutes to prevent redundant /getFile API calls during video scrubbing/streaming.
    */
   public async getFileDownloadUrl(fileId: string): Promise<string> {
+    const cached = this.downloadUrlCache.get(fileId);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.url;
+    }
+
     try {
       const response = await this.client.get<TelegramApiResponse<TelegramFile>>('/getFile', {
         params: { file_id: fileId },
@@ -192,7 +199,15 @@ export class TelegramService {
       }
 
       const filePath = response.data.result.file_path;
-      return `${this.apiRoot}/file/bot${this.botToken}/${filePath}`;
+      const downloadUrl = `${this.apiRoot}/file/bot${this.botToken}/${filePath}`;
+
+      // Cache URL for 45 minutes (Telegram file_path is valid for hours)
+      this.downloadUrlCache.set(fileId, {
+        url: downloadUrl,
+        expiresAt: Date.now() + 45 * 60 * 1000,
+      });
+
+      return downloadUrl;
     } catch (err: any) {
       logger.error({ fileId, err: err.message }, 'Failed to get file path from Telegram');
       throw new Error(err.response?.data?.description || 'Failed to retrieve chunk from Telegram');
@@ -206,7 +221,7 @@ export class TelegramService {
   public async getChunkStream(
     fileId: string,
     rangeHeader?: string
-  ): Promise<{ stream: Readable; headers: Record<string, string> }> {
+  ): Promise<{ stream: Readable; headers: Record<string, string>; status: number }> {
     if (fileId.startsWith('mock_')) {
       const filename = `${fileId.replace('mock_', '')}.bin`;
       const filePath = path.join(this.mockDir, filename);
@@ -224,6 +239,7 @@ export class TelegramService {
           'content-length': stats.size.toString(),
           'accept-ranges': 'bytes',
         },
+        status: 200,
       };
     }
 
@@ -253,6 +269,7 @@ export class TelegramService {
     return {
       stream: response.data,
       headers: responseHeaders,
+      status: response.status,
     };
   }
 

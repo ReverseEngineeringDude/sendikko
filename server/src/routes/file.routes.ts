@@ -406,6 +406,185 @@ router.get(
 );
 
 /**
+ * GET /api/v1/files/:code/stream
+ * HEAD /api/v1/files/:code/stream
+ * High-performance video streaming endpoint backed directly by Telegram chunk storage.
+ * Designed for Reddit embeds, RedGIFs-style playback, and external players.
+ * Supports HTTP 206 Partial Content Range seeking with near-zero backend memory usage.
+ */
+const handleVideoStream = async (req: Request, res: any, next: any) => {
+  try {
+    const code = String(req.params.code || '').toUpperCase();
+    if (!isValidFileCode(code)) {
+      res.status(404).json({ error: { code: 'FILE_NOT_FOUND', message: 'Invalid file code' } });
+      return;
+    }
+
+    const file = await prisma.file.findUnique({
+      where: { code },
+      include: {
+        chunks: { orderBy: { idx: 'asc' } },
+      },
+    });
+
+    if (!file || file.status === 'trashed' || file.status === 'expired') {
+      res.status(404).json({ error: { code: 'FILE_NOT_FOUND', message: 'Video not found or expired' } });
+      return;
+    }
+
+    if (file.expiresAt && file.expiresAt < new Date()) {
+      res.status(410).json({ error: { code: 'FILE_EXPIRED', message: 'Video has expired' } });
+      return;
+    }
+
+    // Password protected files cannot be streamed without unlock token
+    if (file.pwVerifier) {
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.startsWith('Bearer ')
+        ? authHeader.slice(7)
+        : (req.query.token as string);
+      let unlocked = false;
+
+      if (token) {
+        try {
+          const payload = AuthService.verifyDownloadToken(token);
+          if (payload.fileId === file.id && payload.unlocked) {
+            unlocked = true;
+          }
+        } catch {
+          // Token invalid or expired
+        }
+      }
+
+      if (!unlocked) {
+        res.status(403).json({ error: { code: 'PASSWORD_REQUIRED', message: 'File is password-protected' } });
+        return;
+      }
+    }
+
+    if (!file.chunks || file.chunks.length === 0) {
+      res.status(404).json({ error: { code: 'NO_CHUNKS', message: 'No video media chunks available' } });
+      return;
+    }
+
+    const ext = file.nameEnc.split('.').pop()?.toLowerCase() || 'mp4';
+    const videoMimeMap: Record<string, string> = {
+      mp4: 'video/mp4',
+      m4v: 'video/mp4',
+      webm: 'video/webm',
+      mov: 'video/quicktime',
+      mkv: 'video/x-matroska',
+      avi: 'video/x-msvideo',
+      ogv: 'video/ogg',
+      ts: 'video/mp2t',
+      gif: 'video/mp4',
+    };
+    const contentType = videoMimeMap[ext] || file.mimeEnc || 'video/mp4';
+    const totalSize = Number(file.size);
+
+    // Common streaming headers for Reddit, browsers, and embeds
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges');
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+
+    // Fast HEAD response: Reddit and crawlers check this first to inspect video headers
+    if (req.method === 'HEAD') {
+      res.setHeader('Content-Length', totalSize.toString());
+      res.status(200).end();
+      return;
+    }
+
+    const rangeHeader = req.headers.range;
+
+    // Single chunk file (standard for most clips and videos < 19MB)
+    if (file.chunkCount === 1) {
+      const chunk = file.chunks[0];
+      const tgFileId = CryptoService.decryptAtRest(chunk.tgFileIdEnc);
+
+      const { stream, headers, status } = await telegramService.getChunkStream(tgFileId, rangeHeader);
+
+      if (headers['content-range']) {
+        res.status(status === 206 ? 206 : 200);
+        res.setHeader('Content-Range', headers['content-range']);
+      } else if (rangeHeader) {
+        res.status(206);
+        res.setHeader('Content-Range', `bytes 0-${chunk.size - 1}/${totalSize}`);
+      } else {
+        res.status(200);
+      }
+
+      if (headers['content-length']) {
+        res.setHeader('Content-Length', headers['content-length']);
+      } else {
+        res.setHeader('Content-Length', chunk.size.toString());
+      }
+
+      // If client aborts or scrubs, kill upstream Telegram connection immediately to save server bandwidth
+      req.on('close', () => {
+        stream.destroy();
+      });
+
+      stream.pipe(res);
+      return;
+    }
+
+    // Multi-chunk video file (seeking across 19MB chunk boundaries)
+    if (rangeHeader) {
+      const parts = rangeHeader.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10) || 0;
+      const end = parts[1]
+        ? parseInt(parts[1], 10)
+        : Math.min(start + file.chunkSize - 1, totalSize - 1);
+
+      const chunkIdx = Math.floor(start / file.chunkSize);
+      const chunk = file.chunks.find((c) => c.idx === chunkIdx) || file.chunks[0];
+      const chunkRelStart = start % file.chunkSize;
+      const chunkRelEnd = Math.min(chunk.size - 1, chunkRelStart + (end - start));
+
+      const tgFileId = CryptoService.decryptAtRest(chunk.tgFileIdEnc);
+      const { stream } = await telegramService.getChunkStream(
+        tgFileId,
+        `bytes=${chunkRelStart}-${chunkRelEnd}`
+      );
+
+      const actualServedBytes = chunkRelEnd - chunkRelStart + 1;
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${start + actualServedBytes - 1}/${totalSize}`);
+      res.setHeader('Content-Length', actualServedBytes.toString());
+
+      req.on('close', () => {
+        stream.destroy();
+      });
+
+      stream.pipe(res);
+      return;
+    }
+
+    // No Range header on multi-chunk file: Stream chunk 0 from beginning
+    const chunk0 = file.chunks[0];
+    const tgFileId = CryptoService.decryptAtRest(chunk0.tgFileIdEnc);
+    const { stream, headers } = await telegramService.getChunkStream(tgFileId);
+
+    res.status(200);
+    res.setHeader('Content-Length', headers['content-length'] || chunk0.size.toString());
+
+    req.on('close', () => {
+      stream.destroy();
+    });
+
+    stream.pipe(res);
+  } catch (err: any) {
+    next(err);
+  }
+};
+
+router.get('/:code/stream', handleVideoStream);
+router.head('/:code/stream', handleVideoStream);
+
+/**
  * PATCH /api/v1/files/:id
  * Owner only: updates file settings (name, password, expiry, maxDownloads).
  */
